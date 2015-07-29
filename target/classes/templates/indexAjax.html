@@ -1,0 +1,229 @@
+<!DOCTYPE html >
+<html  xmlns:th="http://www.thymeleaf.org" ng-app="rcw">
+<head lang="ja">
+    <meta charset="UTF-8" />
+    <title>Record Writer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet"
+          href="/static/bower_components/bootstrap/dist/css/bootstrap.css"
+          th:href="@{/bower_components/bootstrap/dist/css/bootstrap.css}"/>
+    <link rel="stylesheet"
+          href="/static/css/rcwStyle.css"
+          th:href="@{/css/rcwStyle.css}"/>
+    <script src="/static/bower_components/jquery/dist/jquery.js"
+            th:src="@{/bower_components/jquery/dist/jquery.js}"></script>
+    <script src="/static/bower_components/bootstrap/dist/js/bootstrap.js"
+            th:src="@{/bower_components/bootstrap/dist/js/bootstrap.js}"></script>
+    <script src="/static/bower_components/angularjs/angular.js"
+            th:src="@{/bower_components/angularjs/angular.js}"></script>
+    <script src="/static/bower_components/angular-resource/angular-resource.js"
+        th:src="@{/bower_components/angular-resource/angular-resource.js}"></script>
+    <script src="/static/js/app.js" th:src="@{/js/app.js}"></script>
+    <script src="/static/js/controller/indexController.js" th:src="@{/js/controller/indexController.js}"></script>
+    <script src="/static/js/service/recordService.js" th:src="@{/js/service/recordService.js}"></script>
+    <base href="/" />
+</head>
+<body>
+    <div class="container" ng-controller="indexController">
+        <div ng-form="form" novalidate="">
+            <div class="panel-group" id="writeRecord">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#writeRecord" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                今日の出来事を記載する
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <div class="row" style="margin-top:20px">
+                                <div class="form-group has-feedback" ng-class="{true: 'has-error',false: 'is-required'}[form.title.$dirty &amp;&amp; form.title.$invalid]" >
+                                    <label
+                                            class="control-label col col-md-1 col-sm-2 col-xs-3"
+                                            for="title">Title:</label>
+                                    <div class="col col-md-5 col-sm-10 col-xs-9 ">
+                                        <input
+                                                class="form-control"
+                                                placeholder="今日は何がありましたか？"
+                                                ng-model="title"
+                                                ng-required="editRecord === false"
+                                                ng-show="editRecord === false"
+                                                name="title" id="title"  type="text"/>
+                                        <input
+                                                class="form-control"
+                                                placeholder="今日は何がありましたか？"
+                                                ng-model="editTargetRecord.title"
+                                                required="true"
+                                                ng-if="editRecord"
+                                                name="editTargetRecord_title" id="title"  type="text"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <fieldset>
+                                <div class="row" style="margin-top:20px">
+                                    <div class="form-group" ng-class="{true: 'has-error',false: 'is-required'}[form.record.$dirty &amp;&amp; form.record.$invalid]" >
+                                        <label
+                                                class="control-label col col-md-1 col-sm-2 col-xs-3"
+                                                for="record">Record:</label>
+                                        <div class="col col-md-5 col-sm-10 col-xs-9" >
+                                            <textarea
+                                                    class="form-control"
+                                                    name="record"
+                                                    ng-model="record"
+                                                    ng-required="editRecord === false"
+                                                    ng-show="editRecord === false"
+                                                    id="record"
+                                                    cols="30"
+                                                    rows="5"
+                                                    placeholder="詳細に教えていただけますか？" ></textarea>
+                                            <textarea
+                                                    class="form-control"
+                                                    name="editTargetRecord_record"
+                                                    ng-model="editTargetRecord.record"
+                                                    required="true"
+                                                    ng-if="editRecord"
+                                                    id="record"
+                                                    cols="30"
+                                                    rows="5"
+                                                    placeholder="詳細に教えていただけますか？" ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:20px">
+                                    <div class="form-group" ng-if="editRecord===false">
+                                        <table class="col col-md-1 col-md-offset-3 col-sm-2 col-xs-3">
+                                            <tr>
+                                                <td class="text-right small" ng-class="lengthCheck(title,'20')" style="padding-right: 15px;">{{20 - title.length}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-right small" ng-class="lengthCheck(record,'140')" style="padding-right: 15px;">{{140 - record.length}}</td>
+                                            </tr>
+                                        </table>
+                                        <div class="col
+                                                    col-md-2 col-md-offset-0
+                                                    col-sm-10 col-sm-offset-0
+                                                    col-xs-9 col-xs-offset-0">
+                                            <button ng-click="createRecord()"
+                                                    ng-class="{disabled:form.$invalid}"
+                                                    class="btn btn-default form-control" >送信</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-if="editRecord">
+                                        <table class="col col-md-1 col-md-offset-1 col-sm-2 col-xs-3">
+                                            <tr>
+                                                <td ng-if="editRecord===false"
+                                                    class="text-right small"
+                                                    ng-class="lengthCheck(title,'20')"
+                                                    style="padding-right: 15px;">
+                                                    {{20 - title.length}}
+                                                </td>
+                                                <td ng-if="editRecord"
+                                                    class="text-right small"
+                                                    ng-class="lengthCheck(editTargetRecord.title,'20')"
+                                                    style="padding-right: 15px;">
+                                                    {{20 - editTargetRecord.title.length}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td ng-if="editRecord===false"
+                                                    class="text-right small"
+                                                    ng-class="lengthCheck(record,'140')"
+                                                    style="padding-right: 15px;">
+                                                    {{140 - record.length}}
+                                                </td>
+                                                <td ng-if="editRecord"
+                                                    class="text-right small"
+                                                    ng-class="lengthCheck(editTargetRecord.record,'140')"
+                                                    style="padding-right: 15px;">
+                                                    {{140 - editTargetRecord.record.length}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div class="col
+                                                    col-md-2 col-md-offset-0
+                                                    col-sm-10 col-sm-offset-0
+                                                    col-xs-9 col-xs-offset-0">
+                                            <button type="submit"
+                                                    ng-click="releaseTargetRecord()"
+                                                    class="btn btn-default form-control" >選択解除</button>
+                                        </div>
+                                        <div class="col
+                                                    col-md-2 col-md-offset-0
+                                                    col-sm-10 col-sm-offset-0
+                                                    col-xs-9 col-xs-offset-0">
+                                            <button ng-click="updateRecord()"
+                                                    ng-class="{disabled:form.$invalid}"
+                                                    class="btn btn-default form-control" >更新</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-repeat="record in records" ng-if="$index % 3 === 0">
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne{{$index}}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" ng-href="#record{{$index}}"
+                               aria-expanded="true" aria-controls="collapseOne">
+                                {{records[$index].title}}
+                            </a>
+                            <span ng-click="deleteRecord(records[$index].id)" class="text-danger glyphicon glyphicon-remove floatRightIcon" aria-hidden="true"></span>
+                        </h4>
+                    </div>
+                    <div id="record{{$index}}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" ng-click="selectEditTargetRecord(records[$index])" ng-class="{editableRecord:records[$index].id !== editTargetRecord.id}">
+                           {{records[$index].record}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group" ng-if="records[$index + 1]">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne{{$index + 1}}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" ng-href="#record{{$index + 1}}"
+                               aria-expanded="true" aria-controls="collapseOne">
+                                {{records[$index + 1].title}}
+                            </a>
+                            <span ng-click="deleteRecord(records[$index + 1].id)" class="text-danger glyphicon glyphicon-remove floatRightIcon" aria-hidden="true"></span>
+                        </h4>
+                    </div>
+                    <div id="record{{$index + 1}}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" ng-click="selectEditTargetRecord(records[$index + 1])" ng-class="{editableRecord:records[$index + 1].id !== editTargetRecord.id}">
+                            {{records[$index + 1].record}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group" ng-if="records[$index + 2]">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne{{$index + 2}}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" ng-href="#record{{$index + 2}}"
+                               aria-expanded="true" aria-controls="collapseOne">
+                                {{records[$index + 2].title}}
+                            </a>
+                            <span ng-click="deleteRecord(records[$index + 2].id)" class="text-danger glyphicon glyphicon-remove floatRightIcon" aria-hidden="true"></span>
+                        </h4>
+                    </div>
+                    <div id="record{{$index + 2}}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" ng-click="selectEditTargetRecord(records[$index + 2])" ng-class="{editableRecord:records[$index + 2].id !== editTargetRecord.id}">
+                            {{records[$index + 2].record}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+
