@@ -1,0 +1,10 @@
+.floatRightIcon{
+    float:right;
+    cursor: pointer;
+}
+.editableRecord{
+    cursor: pointer;
+}
+.editableRecord:hover{
+    text-decoration: underline;
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html >
+<html  xmlns:th="http://www.thymeleaf.org" ng-app="rcw">
+<head lang="ja">
+    <meta charset="UTF-8" />
+    <title>Record Writer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet"
+          href="/static/bower_components/bootstrap/dist/css/bootstrap.css"
+          th:href="@{/bower_components/bootstrap/dist/css/bootstrap.css}"/>
+    <script src="/static/bower_components/jquery/dist/jquery.js"
+            th:src="@{/bower_components/jquery/dist/jquery.js}"></script>
+    <script src="/static/bower_components/bootstrap/dist/js/bootstrap.js"
+            th:src="@{/bower_components/bootstrap/dist/js/bootstrap.js}"></script>
+    <script src="/static/bower_components/angularjs/angular.js"
+            th:src="@{/bower_components/angularjs/angular.js}"></script>
+    <script src="/static/bower_components/angular-resource/angular-resource.js"
+            th:src="@{/bower_components/angular-resource/angular-resource.js}"></script>
+    <script src="/static/js/app.js" th:src="@{/js/app.js}"></script>
+    <script src="/static/js/controller/indexController.js" th:src="@{/js/controller/indexController.js}"></script>
+    <script src="/static/js/service/recordService.js" th:src="@{/js/service/recordService.js}"></script>
+    <base href="/" />
+</head>
+<body>
+    <div class="container" ng-controller="indexController">
+        <form name="form" action="./" method="post" th:object="${recordForm}" novalidate="">
+            <div class="panel-group" id="writeRecord">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#writeRecord" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                予定を記載
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <div class="row" style="margin-top:20px">
+                                <div class="form-group has-feedback" ng-class="{true: 'has-error',false: 'is-required'}[form.title.$dirty &amp;&amp; form.title.$invalid]" >
+                                    <label
+                                            class="control-label col col-md-1 col-sm-2 col-xs-3"
+                                            for="title">Title:</label>
+                                    <div class="col col-md-5 col-sm-10 col-xs-9 ">
+                                        <input
+                                                class="form-control"
+                                                placeholder="タイトル"
+                                                ng-model="title"
+                                                required="true"
+                                                name="title" id="title" th:field="*{title}" type="text"/>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <fieldset>
+                                <div class="row" style="margin-top:20px">
+                                    <div class="form-group" ng-class="{true: 'has-error',false: 'is-required'}[form.record.$dirty &amp;&amp; form.record.$invalid]" >
+                                        <label
+                                                class="col col-md-1 col-sm-2 col-xs-3"
+                                                for="record">Record:</label>
+                                        <div class="col col-md-5 col-sm-10 col-xs-9" >
+                                            <textarea
+                                                    class="form-control"
+                                                    name="record"
+                                                    ng-model="record"
+                                                    required="true"
+                                                    id="record"
+                                                    cols="30"
+                                                    rows="5"
+                                                    placeholder="詳細"
+                                                    th:field="*{record}"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:20px">
+                                    <div class="form-group">
+                                        <table class="col col-md-1 col-md-offset-3 col-sm-2 col-xs-3">
+                                            <tr>
+                                                <td class="text-right small" ng-class="lengthCheck(title,'20')" style="padding-right: 15px;">{{20 - title.length}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-right small" ng-class="lengthCheck(record,'140')" style="padding-right: 15px;">{{140 - record.length}}</td>
+                                            </tr>
+                                        </table>
+                                        <div class="col
+                                                    col-md-2 col-md-offset-0
+                                                    col-sm-10 col-sm-offset-0
+                                                    col-xs-9 col-xs-offset-0">
+                                            <button type="submit"
+                                                    ng-class="{disabled:form.$invalid}"
+                                                    class="btn btn-default form-control" >送信</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="row" th:each="record,iterStat  : ${records}" th:remove="${iterStat.index mod 3 != 0 } ? all">
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" th:id="headingOne + ${iterStat.index}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" th:href="'#record' + ${iterStat.index}"
+                               aria-expanded="true" aria-controls="collapseOne" th:text="${record.title}">
+                            </a>
+                        </h4>
+                    </div>
+                    <div th:id="'record' + ${iterStat.index}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" th:text="${record.record}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group" th:if="${#lists.size(records) gt (iterStat.index + 1)}">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" th:id="headingOne + ${iterStat.index + 1}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" th:href="'#record' + ${iterStat.index + 1}"
+                               aria-expanded="true" aria-controls="collapseOne" th:text="${records[iterStat.index + 1].title}">
+                            </a>
+                        </h4>
+                    </div>
+                    <div th:id="'record' + ${iterStat.index + 1}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" th:text="${records[iterStat.index + 1].record}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col col-md-4 col-sm-6 col-xs-12 panel-group" th:if="${#lists.size(records) gt iterStat.index + 2}">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" th:id="headingOne + ${iterStat.index + 2}">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" th:href="'#record' + ${iterStat.index + 2}"
+                               aria-expanded="true" aria-controls="collapseOne" th:text="${records[iterStat.index + 2].title}">
+                            </a>
+                        </h4>
+                    </div>
+                    <div th:id="'record' + ${iterStat.index + 2}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body" th:text="${records[iterStat.index + 2].record}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+

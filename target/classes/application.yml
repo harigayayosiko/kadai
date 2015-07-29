@@ -1,0 +1,16 @@
+spring:
+    profiles:
+        active: dev
+---
+spring:
+    profiles: dev
+    datasource:
+        url: jdbc:mysql://localhost/record_writer?characterEncoding=UTF-8
+        username: record_writer
+        password: record_writer
+        driverClassName: com.mysql.jdbc.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+    thymeleaf:
+        cache: false
